@@ -33,7 +33,7 @@ hardening rules, signs and attests the final artifacts, and validates them again
 release policies locally or in CI/CD.
 
 Learn more: https://github.com/Helixar-AI/ReleaseGuard`,
-		Version: version,
+		Version: fmt.Sprintf("%s (commit %s, built %s)", version, commit, date),
 	}
 
 	root.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default: .releaseguard.yml)")
