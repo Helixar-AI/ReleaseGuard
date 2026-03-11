@@ -60,16 +60,12 @@ func (e *Engine) obfuscateJS(absPath, relPath, level string) ([]Op, error) {
 
 	if targets.StringEncrypt {
 		ops = append(ops, Op{Type: "js_string_encrypt", Path: relPath})
-		if !e.dryRun {
-			// TODO: Phase 7 — call terser/acorn via subprocess
-		}
+		// TODO: Phase 7 — call terser/acorn via subprocess (when !e.dryRun)
 	}
 
 	if targets.PropertyMangle {
 		ops = append(ops, Op{Type: "js_property_mangle", Path: relPath})
-		if !e.dryRun {
-			// TODO: Phase 7
-		}
+		// TODO: Phase 7 — apply property mangling (when !e.dryRun)
 	}
 
 	if targets.ControlFlowFlatten && (level == "medium" || level == "aggressive") {
