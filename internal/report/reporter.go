@@ -102,7 +102,7 @@ func writeSARIF(w io.Writer, result *model.ScanResult) error {
 		Runs    []sarifRun `json:"runs"`
 	}
 
-	var results []sarifResult
+	results := make([]sarifResult, 0)
 	for _, f := range result.Findings {
 		sr := sarifResult{RuleID: f.ID}
 		sr.Message.Text = f.Message

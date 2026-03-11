@@ -52,7 +52,7 @@ jobs:
           fi
 
       - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always() && matrix.goos == 'linux' && matrix.goarch == 'amd64'
         with:
           sarif_file: releaseguard.sarif
