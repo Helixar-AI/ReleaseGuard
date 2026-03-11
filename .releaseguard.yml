@@ -18,6 +18,7 @@ sbom:
 
 scanning:
   exclude_paths:
+    - bin
     - test/fixtures
     - examples
   secrets:

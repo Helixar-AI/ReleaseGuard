@@ -79,6 +79,12 @@ func (w *Walker) Walk(root string) ([]model.Artifact, error) {
 
 // isExcluded returns true when rel matches any configured exclude glob.
 func (w *Walker) isExcluded(rel string) bool {
+	// Always skip VCS metadata directories — they are never part of a release artifact.
+	if rel == ".git" || strings.HasPrefix(rel, ".git/") ||
+		rel == ".hg" || strings.HasPrefix(rel, ".hg/") ||
+		rel == ".svn" || strings.HasPrefix(rel, ".svn/") {
+		return true
+	}
 	for _, ex := range w.ExcludeGlobs {
 		// Normalise: strip trailing /** or /
 		ex = strings.TrimSuffix(ex, "/**")
