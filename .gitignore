@@ -27,6 +27,8 @@ coverage.html
 # Env files — never commit
 .env
 .env.*
+# Exception: test fixtures intentionally contain fake credentials
+!test/fixtures/**/.env
 
 # Test fixtures with secrets (add clean fixtures instead)
 test/fixtures/secrets/

@@ -105,36 +105,33 @@ func detectEcosystem(root, eco string) ([]model.SBOMComponent, error) {
 }
 
 func detectNode(root string) ([]model.SBOMComponent, error) {
-	lockFile := filepath.Join(root, "package-lock.json")
-	if _, err := os.Stat(lockFile); os.IsNotExist(err) {
-		return nil, nil // no Node.js project here
+	for _, candidate := range []string{"package-lock.json", "yarn.lock", "pnpm-lock.yaml"} {
+		if _, err := os.Stat(filepath.Join(root, candidate)); err == nil {
+			return parseNodeLockfile(root)
+		}
 	}
-	// TODO: parse package-lock.json and build component list
-	return []model.SBOMComponent{}, nil
+	return nil, nil
 }
 
 func detectPython(root string) ([]model.SBOMComponent, error) {
-	for _, candidate := range []string{"requirements.txt", "Pipfile.lock", "poetry.lock"} {
+	for _, candidate := range []string{"Pipfile.lock", "poetry.lock", "requirements.txt"} {
 		if _, err := os.Stat(filepath.Join(root, candidate)); err == nil {
-			// TODO: parse candidate and build component list
-			return []model.SBOMComponent{}, nil
+			return parsePythonLockfile(root)
 		}
 	}
 	return nil, nil
 }
 
 func detectGo(root string) ([]model.SBOMComponent, error) {
-	if _, err := os.Stat(filepath.Join(root, "go.mod")); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(root, "go.sum")); os.IsNotExist(err) {
 		return nil, nil
 	}
-	// TODO: run `go list -m -json all` and parse output
-	return []model.SBOMComponent{}, nil
+	return parseGoMod(root)
 }
 
 func detectRust(root string) ([]model.SBOMComponent, error) {
 	if _, err := os.Stat(filepath.Join(root, "Cargo.lock")); os.IsNotExist(err) {
 		return nil, nil
 	}
-	// TODO: parse Cargo.lock
-	return []model.SBOMComponent{}, nil
+	return parseCargoLock(root)
 }

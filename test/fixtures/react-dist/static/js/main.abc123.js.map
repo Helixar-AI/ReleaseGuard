@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://test-app/src/index.js","webpack://test-app/src/App.js"],"sourcesContent":["import React from 'react';\nimport App from './App';\n","export default function App() { return null; }"],"mappings":"AAAA"}

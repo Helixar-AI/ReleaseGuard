@@ -1,10 +1,12 @@
 package transform
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/Helixar-AI/ReleaseGuard/internal/collect"
 	"github.com/Helixar-AI/ReleaseGuard/internal/config"
@@ -65,11 +67,65 @@ func (e *Engine) Run(root string, artifacts []model.Artifact) ([]model.Transform
 		})
 	}
 
+	// Generate manifest.json inventory
+	if tcfg.AddManifest {
+		if err := e.writeManifest(root, artifacts); err != nil {
+			return transforms, fmt.Errorf("writing manifest: %w", err)
+		}
+		transforms = append(transforms, model.Transform{
+			ID:     e.nextID(),
+			Action: model.ActionAdd,
+			Path:   "manifest.json",
+			Reason: "add_manifest",
+		})
+	}
+
 	return transforms, nil
 }
 
+// manifestEntry is a single file record in manifest.json.
+type manifestEntry struct {
+	Path   string `json:"path"`
+	SHA256 string `json:"sha256"`
+	Size   int64  `json:"size"`
+	MIME   string `json:"mime"`
+}
+
+// manifestFile is the top-level structure for manifest.json.
+type manifestFile struct {
+	Version     string          `json:"version"`
+	GeneratedAt string          `json:"generated_at"`
+	TotalFiles  int             `json:"total_files"`
+	TotalBytes  int64           `json:"total_bytes"`
+	Files       []manifestEntry `json:"files"`
+}
+
+func (e *Engine) writeManifest(root string, artifacts []model.Artifact) error {
+	if e.dryRun {
+		return nil
+	}
+	mf := manifestFile{
+		Version:     "1",
+		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
+		TotalFiles:  len(artifacts),
+	}
+	for _, a := range artifacts {
+		mf.TotalBytes += a.Size
+		mf.Files = append(mf.Files, manifestEntry{
+			Path:   a.Path,
+			SHA256: a.SHA256,
+			Size:   a.Size,
+			MIME:   a.MIME,
+		})
+	}
+	data, err := json.MarshalIndent(mf, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(root, "manifest.json"), data, 0644)
+}
+
 func (e *Engine) deleteFile(absPath, relPath, beforeSHA, reason string) (model.Transform, error) {
-	e.seq++
 	t := model.Transform{
 		ID:        e.nextID(),
 		Action:    model.ActionDelete,

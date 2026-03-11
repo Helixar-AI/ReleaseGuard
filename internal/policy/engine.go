@@ -1,6 +1,8 @@
 package policy
 
 import (
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/Helixar-AI/ReleaseGuard/internal/config"
@@ -39,6 +41,37 @@ func (e *Evaluator) Evaluate(findings []model.Finding) *model.PolicyResult {
 		result.Gates = append(result.Gates, gr)
 		if gr.Result == model.OutcomeWarn && result.Result == model.OutcomePass {
 			result.Result = model.OutcomeWarn
+		}
+	}
+
+	// Optional OPA/Rego policy evaluation
+	if e.cfg.Policy.RegoBundle != "" {
+		re := NewRegoEvaluator(e.cfg.Policy.RegoBundle)
+		regoResult, err := re.Evaluate(EvalInput{Findings: findings})
+		if err != nil {
+			// Non-fatal: log and continue
+			fmt.Fprintf(os.Stderr, "  [rego] evaluation error: %v\n", err)
+		} else if regoResult != nil && !regoResult.Allow {
+			result.Result = model.OutcomeFail
+			for _, msg := range regoResult.Deny {
+				result.Gates = append(result.Gates, model.GateResult{
+					Rule:   "rego:deny",
+					Result: model.OutcomeFail,
+					Findings: []string{msg},
+				})
+			}
+		}
+		if regoResult != nil {
+			for _, msg := range regoResult.Warn {
+				if result.Result == model.OutcomePass {
+					result.Result = model.OutcomeWarn
+				}
+				result.Gates = append(result.Gates, model.GateResult{
+					Rule:   "rego:warn",
+					Result: model.OutcomeWarn,
+					Findings: []string{msg},
+				})
+			}
 		}
 	}
 
