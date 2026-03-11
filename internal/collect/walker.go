@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/Helixar-AI/ReleaseGuard/internal/model"
 )
@@ -14,6 +15,9 @@ const defaultMaxArchiveDepth = 3
 // Walker walks a directory tree and builds an artifact inventory.
 type Walker struct {
 	MaxArchiveDepth int
+	// ExcludeGlobs contains path prefixes (relative to root) that should be
+	// skipped entirely. Trailing /** is stripped; prefix matching is used.
+	ExcludeGlobs []string
 }
 
 // NewWalker returns a Walker with default settings.
@@ -37,13 +41,23 @@ func (w *Walker) Walk(root string) ([]model.Artifact, error) {
 		if err != nil {
 			return err
 		}
-		if d.IsDir() {
-			return nil
-		}
 
 		rel, err := filepath.Rel(root, path)
 		if err != nil {
 			return err
+		}
+		// Normalise to forward slashes for consistent glob matching.
+		rel = filepath.ToSlash(rel)
+
+		if d.IsDir() {
+			if rel != "." && w.isExcluded(rel) {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		if w.isExcluded(rel) {
+			return nil
 		}
 
 		artifact, err := w.buildArtifact(path, rel, 0)
@@ -61,6 +75,23 @@ func (w *Walker) Walk(root string) ([]model.Artifact, error) {
 	}
 
 	return artifacts, nil
+}
+
+// isExcluded returns true when rel matches any configured exclude glob.
+func (w *Walker) isExcluded(rel string) bool {
+	for _, ex := range w.ExcludeGlobs {
+		// Normalise: strip trailing /** or /
+		ex = strings.TrimSuffix(ex, "/**")
+		ex = strings.TrimSuffix(ex, "/")
+		ex = filepath.ToSlash(ex)
+		if rel == ex || strings.HasPrefix(rel, ex+"/") {
+			return true
+		}
+		if matched, _ := filepath.Match(ex, rel); matched {
+			return true
+		}
+	}
+	return false
 }
 
 func (w *Walker) buildArtifact(absPath, relPath string, depth int) (model.Artifact, error) {

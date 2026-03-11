@@ -37,10 +37,13 @@ type SBOMConfig struct {
 }
 
 type ScanConfig struct {
-	Secrets         SecretsConfig  `mapstructure:"secrets"          yaml:"secrets"`
-	Metadata        MetadataConfig `mapstructure:"metadata"         yaml:"metadata"`
+	// ExcludePaths lists path prefixes (relative to scan root) to skip entirely.
+	// Trailing /** is accepted but not required. Example: ["test/fixtures", "vendor"]
+	ExcludePaths    []string         `mapstructure:"exclude_paths"    yaml:"exclude_paths,omitempty"`
+	Secrets         SecretsConfig    `mapstructure:"secrets"          yaml:"secrets"`
+	Metadata        MetadataConfig   `mapstructure:"metadata"         yaml:"metadata"`
 	UnexpectedFiles UnexpectedConfig `mapstructure:"unexpected_files" yaml:"unexpected_files"`
-	Licenses        LicenseConfig  `mapstructure:"licenses"         yaml:"licenses"`
+	Licenses        LicenseConfig    `mapstructure:"licenses"         yaml:"licenses"`
 }
 
 type SecretsConfig struct {

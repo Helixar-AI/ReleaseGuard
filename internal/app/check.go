@@ -29,6 +29,7 @@ func Check(path, format, out string) error {
 	// Collect
 	fmt.Println("  Collecting artifacts...")
 	walker := collect.NewWalker()
+	walker.ExcludeGlobs = cfg.Scanning.ExcludePaths
 	artifacts, err := walker.Walk(path)
 	if err != nil {
 		return fmt.Errorf("collecting artifacts: %w", err)
