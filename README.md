@@ -2,6 +2,8 @@
 
 > **The artifact policy engine for `dist/` and `release/` outputs.**
 
+![ReleaseGuard — The Artifact Security Engine](docs/release-guard-banner.png)
+
 ReleaseGuard is an open-source artifact security engine. It scans build outputs for risky content, applies deterministic hardening transforms, generates full SBOMs, signs and attests the final artifacts, and validates them against release policies — locally or in any CI/CD pipeline.
 
 [![CI](https://github.com/Helixar-AI/ReleaseGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/Helixar-AI/ReleaseGuard/actions/workflows/ci.yml)
