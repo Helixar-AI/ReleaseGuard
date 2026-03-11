@@ -1,0 +1,97 @@
+name: ReleaseGuard
+description: Scan, harden, sign, and verify release artifacts before they ship.
+author: Helixar AI
+
+branding:
+  icon: shield
+  color: blue
+
+inputs:
+  path:
+    description: Path to artifact directory or archive to scan
+    required: false
+    default: ./dist
+  config:
+    description: Path to .releaseguard.yml config file
+    required: false
+    default: .releaseguard.yml
+  fail-on:
+    description: Comma-separated severity levels that fail the build (critical,high,medium,low)
+    required: false
+    default: critical,high
+  sbom:
+    description: Generate a Software Bill of Materials
+    required: false
+    default: "false"
+  fix:
+    description: Apply safe hardening transforms before scanning
+    required: false
+    default: "false"
+  obfuscation:
+    description: Obfuscation level (none, light — medium/aggressive require Cloud)
+    required: false
+    default: none
+  sign:
+    description: Sign the artifact after scanning (keyless, local, none)
+    required: false
+    default: none
+  format:
+    description: Report format (cli, json, sarif, html)
+    required: false
+    default: sarif
+  token:
+    description: ReleaseGuard Cloud API token (optional — enables Cloud features)
+    required: false
+    default: ""
+
+outputs:
+  result:
+    description: Policy result (pass, warn, fail)
+  report-path:
+    description: Path to generated report file
+  evidence-dir:
+    description: Path to evidence bundle directory
+
+runs:
+  using: composite
+  steps:
+    - name: Install releaseguard
+      shell: bash
+      run: |
+        curl -sSfL https://github.com/Helixar-AI/ReleaseGuard/releases/latest/download/install.sh | sh
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Run releaseguard check
+      shell: bash
+      run: |
+        releaseguard check "${{ inputs.path }}" \
+          --format "${{ inputs.format }}" \
+          --out ".releaseguard/report.${{ inputs.format }}"
+
+    - name: Generate SBOM
+      if: inputs.sbom == 'true'
+      shell: bash
+      run: releaseguard sbom "${{ inputs.path }}"
+
+    - name: Apply hardening transforms
+      if: inputs.fix == 'true'
+      shell: bash
+      run: releaseguard fix "${{ inputs.path }}"
+
+    - name: Apply obfuscation
+      if: inputs.obfuscation != 'none'
+      shell: bash
+      run: releaseguard obfuscate "${{ inputs.path }}" --level "${{ inputs.obfuscation }}"
+
+    - name: Sign artifact
+      if: inputs.sign != 'none'
+      shell: bash
+      run: releaseguard sign "${{ inputs.path }}" --mode "${{ inputs.sign }}"
+
+    - name: Upload evidence bundle
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: releaseguard-evidence
+        path: .releaseguard/
+        if-no-files-found: warn

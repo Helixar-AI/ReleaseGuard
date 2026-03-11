@@ -1,0 +1,37 @@
+# Build outputs
+/bin/
+/dist/
+*.exe
+*.test
+
+# Evidence bundles (generated at runtime — don't commit)
+/.releaseguard/
+
+# Go
+vendor/
+coverage.out
+coverage.html
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Env files — never commit
+.env
+.env.*
+
+# Test fixtures with secrets (add clean fixtures instead)
+test/fixtures/secrets/
+
+# Release artifacts
+*.tar.gz
+*.zip
+*.sig
