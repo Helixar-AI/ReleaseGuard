@@ -1,0 +1,97 @@
+version: 2
+
+project_name: releaseguard
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: releaseguard
+    main: ./cmd/releaseguard
+    binary: releaseguard
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: releaseguard
+    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+release:
+  github:
+    owner: Helixar-AI
+    name: ReleaseGuard
+  name_template: "v{{.Version}}"
+  draft: false
+  prerelease: auto
+  header: |
+    ## ReleaseGuard v{{.Version}}
+
+    The artifact policy engine — scan, harden, sign, and verify release artifacts before they ship.
+
+    ### Install
+
+    ```bash
+    # macOS / Linux (shell installer)
+    curl -sSfL https://raw.githubusercontent.com/Helixar-AI/ReleaseGuard/main/scripts/install.sh | sh
+
+    # Homebrew
+    brew install Helixar-AI/tap/releaseguard
+    ```
+
+    ### GitHub Action
+
+    ```yaml
+    - uses: Helixar-AI/ReleaseGuard@v{{.Major}}
+      with:
+        path: ./dist
+    ```
+  footer: |
+    **Full Changelog**: https://github.com/Helixar-AI/ReleaseGuard/compare/{{.PreviousTag}}...{{.Tag}}
+
+brews:
+  - name: releaseguard
+    homepage: https://github.com/Helixar-AI/ReleaseGuard
+    description: "Artifact policy engine — scan, harden, sign, and verify release artifacts before they ship."
+    license: MIT
+    repository:
+      owner: Helixar-AI
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    commit_author:
+      name: releaseguard-bot
+      email: bot@helixar.ai
+    install: |
+      bin.install "releaseguard"
+    test: |
+      system "#{bin}/releaseguard", "--version"
+
+announce:
+  skip: "true"

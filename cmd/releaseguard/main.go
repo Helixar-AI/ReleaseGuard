@@ -13,6 +13,8 @@ import (
 var (
 	cfgFile string
 	version = "dev"
+	commit  = "none"
+	date    = "unknown"
 )
 
 func main() {
