@@ -7,7 +7,7 @@ func Harden(path, obfuscationLevel string, dryRun bool) error {
 	fmt.Printf("releaseguard harden %s\n\n", path)
 
 	fmt.Println("  [1/3] Applying transforms...")
-	if err := Fix(path, dryRun); err != nil {
+	if err := Fix(path, "", dryRun); err != nil {
 		return fmt.Errorf("fix stage: %w", err)
 	}
 

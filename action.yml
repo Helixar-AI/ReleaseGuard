@@ -72,33 +72,38 @@ runs:
         curl -sSfL https://raw.githubusercontent.com/Helixar-AI/ReleaseGuard/main/scripts/install.sh | sh
         echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-    - name: Run releaseguard check
-      id: check
-      shell: bash
-      run: |
-        REPORT=".releaseguard/report.${{ inputs.format }}"
-        releaseguard check "${{ inputs.path }}" \
-          --config "${{ inputs.config }}" \
-          --format "${{ inputs.format }}" \
-          --out "$REPORT"
-        echo "report-path=${REPORT}" >> "$GITHUB_OUTPUT"
-        # Derive result from exit code (0 = pass/warn, 1 = fail)
-        echo "result=pass" >> "$GITHUB_OUTPUT"
-
-    - name: Generate SBOM
-      if: inputs.sbom == 'true'
-      shell: bash
-      run: releaseguard sbom "${{ inputs.path }}" --config "${{ inputs.config }}"
-
     - name: Apply hardening transforms
       if: inputs.fix == 'true'
       shell: bash
-      run: releaseguard fix "${{ inputs.path }}"
+      run: releaseguard fix "${{ inputs.path }}" --config "${{ inputs.config }}"
 
     - name: Apply obfuscation
       if: inputs.obfuscation != 'none'
       shell: bash
       run: releaseguard obfuscate "${{ inputs.path }}" --level "${{ inputs.obfuscation }}"
+
+    - name: Run releaseguard check
+      id: check
+      shell: bash
+      run: |
+        REPORT=".releaseguard/report.${{ inputs.format }}"
+        # Capture exit code so we always write outputs even on policy failure.
+        releaseguard check "${{ inputs.path }}" \
+          --config "${{ inputs.config }}" \
+          --format "${{ inputs.format }}" \
+          --out "$REPORT" || CHECK_EXIT=$?
+        echo "report-path=${REPORT}" >> "$GITHUB_OUTPUT"
+        echo "evidence-dir=.releaseguard" >> "$GITHUB_OUTPUT"
+        if [ "${CHECK_EXIT:-0}" -ne 0 ]; then
+          echo "result=fail" >> "$GITHUB_OUTPUT"
+          exit "${CHECK_EXIT}"
+        fi
+        echo "result=pass" >> "$GITHUB_OUTPUT"
+
+    - name: Generate SBOM
+      if: always() && inputs.sbom == 'true'
+      shell: bash
+      run: releaseguard sbom "${{ inputs.path }}" --config "${{ inputs.config }}"
 
     - name: Sign artifact
       if: inputs.sign != 'none'

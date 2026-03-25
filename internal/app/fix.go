@@ -9,8 +9,8 @@ import (
 )
 
 // Fix applies safe deterministic hardening transforms to path.
-func Fix(path string, dryRun bool) error {
-	cfg, err := config.Load("")
+func Fix(path, configPath string, dryRun bool) error {
+	cfg, err := config.Load(configPath)
 	if err != nil {
 		return fmt.Errorf("loading config: %w", err)
 	}

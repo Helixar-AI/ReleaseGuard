@@ -8,8 +8,8 @@ import (
 )
 
 // SBOM generates a Software Bill of Materials for path.
-func SBOM(path, format, out string, enrichCVE bool) error {
-	cfg, err := config.Load("")
+func SBOM(path, format, out, configPath string, enrichCVE bool) error {
+	cfg, err := config.Load(configPath)
 	if err != nil {
 		return fmt.Errorf("loading config: %w", err)
 	}

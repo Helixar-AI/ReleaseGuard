@@ -92,7 +92,7 @@ func newCheckCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			format, _ := cmd.Flags().GetString("format")
 			out, _ := cmd.Flags().GetString("out")
-			return app.Check(args[0], format, out)
+			return app.Check(args[0], format, out, cfgFile)
 		},
 	}
 	cmd.Flags().String("format", "cli", "output format: cli, json, sarif, markdown, html")
@@ -108,7 +108,7 @@ func newFixCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dryRun, _ := cmd.Flags().GetBool("dry-run")
-			return app.Fix(args[0], dryRun)
+			return app.Fix(args[0], cfgFile, dryRun)
 		},
 	}
 	cmd.Flags().Bool("dry-run", false, "preview transforms without applying them")
@@ -125,7 +125,7 @@ func newSBOMCmd() *cobra.Command {
 			format, _ := cmd.Flags().GetString("format")
 			out, _ := cmd.Flags().GetString("out")
 			enrichCVE, _ := cmd.Flags().GetBool("enrich-cve")
-			return app.SBOM(args[0], format, out, enrichCVE)
+			return app.SBOM(args[0], format, out, cfgFile, enrichCVE)
 		},
 	}
 	cmd.Flags().String("format", "cyclonedx", "output format: cyclonedx, spdx")

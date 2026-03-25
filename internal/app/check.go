@@ -14,8 +14,8 @@ import (
 )
 
 // Check runs the full scanner pipeline and policy evaluation against path.
-func Check(path, format, out string) error {
-	cfg, err := config.Load("")
+func Check(path, format, out, configPath string) error {
+	cfg, err := config.Load(configPath)
 	if err != nil {
 		return fmt.Errorf("loading config: %w", err)
 	}
