@@ -117,3 +117,4 @@ runs:
         name: releaseguard-evidence
         path: .releaseguard/
         if-no-files-found: warn
+        include-hidden-files: true
