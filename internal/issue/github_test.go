@@ -226,7 +226,7 @@ func TestCreateForFindings(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(issueResponse{
+		_ = json.NewEncoder(w).Encode(issueResponse{
 			Number:  42,
 			HTMLURL: "https://github.com/owner/repo/issues/42",
 		})
@@ -280,7 +280,7 @@ func TestCreateForFindingsNoMatch(t *testing.T) {
 func TestCreateForFindingsAPIError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
-		w.Write([]byte(`{"message":"Bad credentials"}`))
+		_, _ = w.Write([]byte(`{"message":"Bad credentials"}`))
 	}))
 	defer server.Close()
 

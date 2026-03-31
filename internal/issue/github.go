@@ -246,7 +246,7 @@ func (g *GitHubCreator) createIssue(req issueRequest) (*issueResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("sending request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
