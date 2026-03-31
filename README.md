@@ -79,6 +79,7 @@ releaseguard harden ./dist
 - Metadata leaks (source maps, debug symbols, build paths, internal URLs)
 - Unexpected content (test files, `.git` remnants, CI configs)
 - License and notice presence checker
+- **Symlink detection** — flags symbolic links in release artifacts, which can cause path traversal vulnerabilities when archives are unpacked
 
 ### SBOM Generation
 - **All major ecosystems**: Node.js, Python, Go, Rust, Java, .NET, Ruby, PHP, Container, System packages
@@ -214,6 +215,10 @@ scanning:
   metadata:
     enabled: true
     fail_on_source_maps: true
+  symlinks:
+    enabled: true
+    allow:
+      - "latest"      # intentional symlink: latest -> v1.2.3
 transforms:
   remove_source_maps: true
   add_checksums: true
