@@ -45,6 +45,12 @@ inputs:
     description: Report format (cli, json, sarif, html)
     required: false
     default: sarif
+  create-issues:
+    description: >
+      Automatically create a GitHub issue when critical vulnerabilities are
+      found. Requires the workflow token to have issues:write permission.
+    required: false
+    default: "false"
   token:
     description: ReleaseGuard Cloud API token (optional — enables Cloud features)
     required: false
@@ -91,6 +97,8 @@ runs:
     - name: Run releaseguard check
       id: check
       shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.create-issues == 'true' && github.token || '' }}
       run: |
         REPORT=".releaseguard/report.${{ inputs.format }}"
         # Capture exit code so we always write outputs even on policy failure.
