@@ -16,6 +16,7 @@ const (
 	CategoryUnexpected = "unexpected"
 	CategoryPolicy     = "policy"
 	CategoryLicense    = "license"
+	CategorySymlink    = "symlink"
 )
 
 // Finding represents a single scanner result.
