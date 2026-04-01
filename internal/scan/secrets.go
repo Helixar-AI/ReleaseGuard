@@ -117,7 +117,7 @@ var secretPatterns = []secretPattern{
 	{
 		id:       "RG-SEC-051",
 		name:     "Slack Webhook URL",
-		pattern:  regexp.MustCompile(`hooks\.slack\.com/services/T[a-zA-Z0-9_]{8,}/B[a-zA-Z0-9_]{8,}/[a-zA-Z0-9]{24}`),
+		pattern:  regexp.MustCompile(`https://hooks\.slack\.com/services/T[a-zA-Z0-9_]{8,}/B[a-zA-Z0-9_]{8,}/[a-zA-Z0-9]{24}`),
 		severity: model.SeverityHigh,
 	},
 	{
