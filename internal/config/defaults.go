@@ -91,6 +91,14 @@ func DefaultConfig() *Config {
 			RequireObfuscation:    "none",
 			RequireIntegrityCheck: false,
 		},
+		Integrations: IntegrationsConfig{
+			GitHubIssues: GitHubIssuesConfig{
+				Enabled:    false,
+				Severities: []string{"critical"},
+				Labels:     []string{"security", "releaseguard", "critical"},
+				Assignees:  []string{},
+			},
+		},
 		Packaging: PackagingConfig{
 			Enabled:             false,
 			Format:              "tar.gz",

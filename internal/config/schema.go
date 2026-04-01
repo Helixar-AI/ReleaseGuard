@@ -12,9 +12,10 @@ type Config struct {
 	DRM       DRMConfig      `mapstructure:"drm"       yaml:"drm"`
 	Signing   SigningConfig  `mapstructure:"signing"   yaml:"signing"`
 	Attestations AttestConfig `mapstructure:"attestations" yaml:"attestations"`
-	Policy    PolicyConfig   `mapstructure:"policy"    yaml:"policy"`
-	Packaging PackagingConfig `mapstructure:"packaging" yaml:"packaging"`
-	Output    OutputConfig   `mapstructure:"output"    yaml:"output"`
+	Policy       PolicyConfig       `mapstructure:"policy"       yaml:"policy"`
+	Integrations IntegrationsConfig `mapstructure:"integrations" yaml:"integrations"`
+	Packaging    PackagingConfig    `mapstructure:"packaging"    yaml:"packaging"`
+	Output       OutputConfig       `mapstructure:"output"       yaml:"output"`
 }
 
 type ProjectConfig struct {
@@ -164,6 +165,19 @@ type PolicyConfig struct {
 type PolicyGate struct {
 	Severity string `mapstructure:"severity" yaml:"severity,omitempty"`
 	Category string `mapstructure:"category" yaml:"category,omitempty"`
+}
+
+// IntegrationsConfig controls external system integrations triggered by scan results.
+type IntegrationsConfig struct {
+	GitHubIssues GitHubIssuesConfig `mapstructure:"github_issues" yaml:"github_issues"`
+}
+
+// GitHubIssuesConfig controls automatic GitHub issue creation on critical findings.
+type GitHubIssuesConfig struct {
+	Enabled    bool     `mapstructure:"enabled"     yaml:"enabled"`
+	Severities []string `mapstructure:"severities"  yaml:"severities"`
+	Labels     []string `mapstructure:"labels"      yaml:"labels"`
+	Assignees  []string `mapstructure:"assignees"   yaml:"assignees"`
 }
 
 type PackagingConfig struct {

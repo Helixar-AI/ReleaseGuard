@@ -7,6 +7,7 @@ import (
 
 	"github.com/Helixar-AI/ReleaseGuard/internal/collect"
 	"github.com/Helixar-AI/ReleaseGuard/internal/config"
+	"github.com/Helixar-AI/ReleaseGuard/internal/issue"
 	"github.com/Helixar-AI/ReleaseGuard/internal/model"
 	"github.com/Helixar-AI/ReleaseGuard/internal/policy"
 	"github.com/Helixar-AI/ReleaseGuard/internal/report"
@@ -77,6 +78,11 @@ func Check(path, format, out, configPath string) error {
 		return fmt.Errorf("writing report: %w", err)
 	}
 
+	// Create GitHub issue for critical findings if enabled
+	if result.Result == model.OutcomeFail && cfg.Integrations.GitHubIssues.Enabled {
+		createGitHubIssue(cfg, findings, scanResult)
+	}
+
 	// Exit code
 	if result.Result == model.OutcomeFail {
 		fmt.Fprintln(os.Stderr, "\nPolicy FAILED. Fix findings or update policy before releasing.")
@@ -89,4 +95,36 @@ func Check(path, format, out, configPath string) error {
 	}
 
 	return nil
+}
+
+// createGitHubIssue attempts to create a GitHub issue for critical findings.
+// It reads GITHUB_TOKEN and GITHUB_REPOSITORY from the environment (standard
+// in GitHub Actions). Errors are logged but do not fail the build — the policy
+// failure exit code is the primary signal.
+func createGitHubIssue(cfg *config.Config, findings []model.Finding, scanResult *model.ScanResult) {
+	token := os.Getenv("GITHUB_TOKEN")
+	if token == "" {
+		fmt.Fprintln(os.Stderr, "  [issue] GITHUB_TOKEN not set, skipping issue creation")
+		return
+	}
+	repo := os.Getenv("GITHUB_REPOSITORY")
+	if repo == "" {
+		fmt.Fprintln(os.Stderr, "  [issue] GITHUB_REPOSITORY not set, skipping issue creation")
+		return
+	}
+
+	creator, err := issue.NewGitHubCreator(token, repo, cfg.Integrations.GitHubIssues)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "  [issue] failed to initialise issue creator: %v\n", err)
+		return
+	}
+
+	url, err := creator.CreateForFindings(findings, scanResult)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "  [issue] failed to create GitHub issue: %v\n", err)
+		return
+	}
+	if url != "" {
+		fmt.Printf("  Created GitHub issue: %s\n", url)
+	}
 }
