@@ -227,6 +227,96 @@ See [docs/config-schema.md](docs/config-schema.md) for the full schema reference
 
 ---
 
+## GitHub Issue Integration
+
+ReleaseGuard can automatically create a GitHub issue when critical vulnerabilities are detected during a scan. This gives your team immediate visibility into what blocked the release and actionable remediation steps — without leaving GitHub.
+
+### How It Works
+
+1. ReleaseGuard scans your release artifacts as part of CI
+2. A critical (or configured severity) vulnerability is found
+3. The release build **fails**
+4. ReleaseGuard automatically creates a GitHub issue with:
+   - Full finding details (severity, category, file path, line number)
+   - Evidence snippets for each finding
+   - Recommended fixes and remediation guidance
+   - Category-specific playbooks (e.g. secret rotation steps)
+   - Whether the finding can be auto-fixed with `releaseguard fix`
+5. Artifacts are dropped and CI reports failure
+
+### Configuration
+
+Add the `integrations.github_issues` section to your `.releaseguard.yml`:
+
+```yaml
+# .releaseguard.yml
+version: 2
+project:
+  name: my-app
+
+policy:
+  fail_on:
+    - severity: critical
+
+integrations:
+  github_issues:
+    enabled: true
+    severities:
+      - critical       # Create issues for critical findings
+      - high           # Optionally include high severity too
+    labels:
+      - security
+      - releaseguard
+    assignees:
+      - your-github-username
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `enabled` | `bool` | Yes | Set to `true` to enable automatic issue creation |
+| `severities` | `string[]` | Yes | Severity levels that trigger issue creation (e.g. `critical`, `high`, `medium`, `low`) |
+| `labels` | `string[]` | No | Labels to apply to created issues |
+| `assignees` | `string[]` | No | GitHub usernames to assign to created issues |
+
+### Authentication
+
+ReleaseGuard needs a GitHub token with `issues:write` permission on the target repository.
+
+**In CI (GitHub Actions):**
+
+```yaml
+- uses: Helixar-AI/ReleaseGuard@<SHA>
+  with:
+    path: ./dist
+  env:
+    RELEASEGUARD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    RELEASEGUARD_REPO: ${{ github.repository }}
+```
+
+The built-in `GITHUB_TOKEN` works for creating issues in the same repository. For cross-repo issue creation, use a personal access token or GitHub App token with the appropriate permissions.
+
+**Locally:**
+
+```bash
+export RELEASEGUARD_GITHUB_TOKEN="ghp_..."
+export RELEASEGUARD_REPO="owner/repo"
+releaseguard check ./dist
+```
+
+### Disabling Issue Creation
+
+Set `enabled: false` in your config, or simply omit the `integrations.github_issues` section entirely:
+
+```yaml
+integrations:
+  github_issues:
+    enabled: false
+```
+
+> **Future roadmap:** Issue creation will be extensible to other systems (Jira, Linear, etc.) via the `integrations` config block.
+
+---
+
 ## Documentation
 
 - [Architecture](docs/architecture.md)
