@@ -16,6 +16,7 @@ const (
 	CategoryUnexpected = "unexpected"
 	CategoryPolicy     = "policy"
 	CategoryLicense    = "license"
+	CategoryFileSize   = "filesize"
 )
 
 // Finding represents a single scanner result.

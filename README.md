@@ -79,6 +79,7 @@ releaseguard harden ./dist
 - Metadata leaks (source maps, debug symbols, build paths, internal URLs)
 - Unexpected content (test files, `.git` remnants, CI configs)
 - License and notice presence checker
+- **File size limits** — per-file and total bundle thresholds to catch accidental large binaries or bloated bundles
 
 ### SBOM Generation
 - **All major ecosystems**: Node.js, Python, Go, Rust, Java, .NET, Ruby, PHP, Container, System packages
@@ -214,6 +215,12 @@ scanning:
   metadata:
     enabled: true
     fail_on_source_maps: true
+  file_size:
+    enabled: true
+    max_file_bytes: 10485760    # 10 MiB per file
+    max_total_bytes: 104857600  # 100 MiB total bundle
+    per_extension:
+      ".wasm": 52428800         # 50 MiB override for WebAssembly
 transforms:
   remove_source_maps: true
   add_checksums: true

@@ -38,6 +38,10 @@ scanning:
     enabled: true
     require:
       - LICENSE
+  file_size:
+    enabled: false          # set to true to enforce artifact size limits
+    max_file_bytes: 10485760    # 10 MiB per file
+    max_total_bytes: 104857600  # 100 MiB total bundle
 
 transforms:
   remove_source_maps: true
