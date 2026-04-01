@@ -44,6 +44,22 @@ type ScanConfig struct {
 	Metadata        MetadataConfig   `mapstructure:"metadata"         yaml:"metadata"`
 	UnexpectedFiles UnexpectedConfig `mapstructure:"unexpected_files" yaml:"unexpected_files"`
 	Licenses        LicenseConfig    `mapstructure:"licenses"         yaml:"licenses"`
+	FileSize        FileSizeConfig   `mapstructure:"file_size"        yaml:"file_size"`
+}
+
+// FileSizeConfig controls detection of oversized files in release artifacts.
+type FileSizeConfig struct {
+	// Enabled controls whether the file size scanner runs.
+	Enabled bool `mapstructure:"enabled" yaml:"enabled"`
+	// MaxFileBytes is the maximum allowed size for any single file (in bytes).
+	// Default: 10 MiB (10 * 1024 * 1024).
+	MaxFileBytes int64 `mapstructure:"max_file_bytes" yaml:"max_file_bytes"`
+	// MaxTotalBytes is the maximum allowed total size of all artifacts combined (in bytes).
+	// Default: 100 MiB (100 * 1024 * 1024).
+	MaxTotalBytes int64 `mapstructure:"max_total_bytes" yaml:"max_total_bytes"`
+	// PerExtension overrides MaxFileBytes for specific file extensions (e.g. ".wasm": 52428800).
+	// Keys must include the leading dot. Values are in bytes.
+	PerExtension map[string]int64 `mapstructure:"per_extension" yaml:"per_extension,omitempty"`
 }
 
 type SecretsConfig struct {
