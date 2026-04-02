@@ -38,6 +38,8 @@ scanning:
     enabled: true
     require:
       - LICENSE
+  symlinks:
+    enabled: false    # set to true to flag symlinks in release artifacts
 
 transforms:
   remove_source_maps: true

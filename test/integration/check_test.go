@@ -145,6 +145,34 @@ func TestCheck_CleanDist_NoSecretFindings(t *testing.T) {
 	}
 }
 
+func TestCheck_ReactDist_NoSymlinkFindings(t *testing.T) {
+	root := filepath.Join(fixturesDir(t), "react-dist")
+	cfg := config.DefaultConfig()
+	cfg.Scanning.Secrets.Enabled = false
+	cfg.Scanning.Metadata.Enabled = false
+	cfg.Scanning.UnexpectedFiles.Enabled = false
+	cfg.Scanning.Licenses.Enabled = false
+	cfg.Scanning.Symlinks = config.SymlinksConfig{Enabled: true}
+
+	walker := collect.NewWalker()
+	artifacts, err := walker.Walk(root)
+	if err != nil {
+		t.Fatalf("walk: %v", err)
+	}
+
+	pipeline := scan.NewPipeline(cfg)
+	findings, err := pipeline.Run(root, artifacts, cfg)
+	if err != nil {
+		t.Fatalf("scan: %v", err)
+	}
+
+	for _, f := range findings {
+		if f.Category == model.CategorySymlink {
+			t.Errorf("unexpected symlink finding in react-dist: %+v", f)
+		}
+	}
+}
+
 func TestCheck_EntropyDetection(t *testing.T) {
 	root := filepath.Join(fixturesDir(t), "react-dist")
 	cfg := config.DefaultConfig()
