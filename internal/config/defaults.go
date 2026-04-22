@@ -38,6 +38,11 @@ func DefaultConfig() *Config {
 				Enabled: true,
 				Require: []string{"LICENSE"},
 			},
+			FileSize: FileSizeConfig{
+				Enabled:       false,
+				MaxFileBytes:  10 * 1024 * 1024,  // 10 MiB
+				MaxTotalBytes: 100 * 1024 * 1024, // 100 MiB
+			},
 		},
 		Transforms: TransformConfig{
 			RemoveSourceMaps:     true,

@@ -145,6 +145,55 @@ func TestCheck_CleanDist_NoSecretFindings(t *testing.T) {
 	}
 }
 
+func TestCheck_ReactDist_FileSizeEnabled(t *testing.T) {
+	root := filepath.Join(fixturesDir(t), "react-dist")
+
+	cfg := config.DefaultConfig()
+	// Disable other scanners to isolate file size findings
+	cfg.Scanning.Secrets.Enabled = false
+	cfg.Scanning.Metadata.Enabled = false
+	cfg.Scanning.UnexpectedFiles.Enabled = false
+	cfg.Scanning.Licenses.Enabled = false
+	cfg.Scanning.FileSize = config.FileSizeConfig{
+		Enabled:       true,
+		MaxFileBytes:  500,   // 500 bytes -- package-lock.json (1238 B) will exceed this
+		MaxTotalBytes: 10000, // well above total fixture size; only per-file should fire
+	}
+
+	walker := collect.NewWalker()
+	artifacts, err := walker.Walk(root)
+	if err != nil {
+		t.Fatalf("walk: %v", err)
+	}
+
+	pipeline := scan.NewPipeline(cfg)
+	findings, err := pipeline.Run(root, artifacts, cfg)
+	if err != nil {
+		t.Fatalf("scan: %v", err)
+	}
+
+	var sizeFindings []model.Finding
+	for _, f := range findings {
+		if f.Category == model.CategoryFileSize {
+			sizeFindings = append(sizeFindings, f)
+		}
+	}
+	if len(sizeFindings) == 0 {
+		t.Error("expected at least one file size finding, got none")
+	}
+
+	var foundSizeExceeded bool
+	for _, f := range sizeFindings {
+		if f.ID == "RG-SIZE-001" {
+			foundSizeExceeded = true
+			break
+		}
+	}
+	if !foundSizeExceeded {
+		t.Errorf("expected RG-SIZE-001 finding for oversized file, got: %+v", sizeFindings)
+	}
+}
+
 func TestCheck_EntropyDetection(t *testing.T) {
 	root := filepath.Join(fixturesDir(t), "react-dist")
 	cfg := config.DefaultConfig()

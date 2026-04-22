@@ -32,6 +32,9 @@ func NewPipeline(cfg *config.Config) *Pipeline {
 	if cfg.Scanning.Licenses.Enabled {
 		p.scanners = append(p.scanners, &LicenseScanner{})
 	}
+	if cfg.Scanning.FileSize.Enabled {
+		p.scanners = append(p.scanners, &FileSizeScanner{})
+	}
 
 	return p
 }
