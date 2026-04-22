@@ -38,6 +38,9 @@ func DefaultConfig() *Config {
 				Enabled: true,
 				Require: []string{"LICENSE"},
 			},
+			Symlinks: SymlinksConfig{
+				Enabled: false,
+			},
 		},
 		Transforms: TransformConfig{
 			RemoveSourceMaps:     true,

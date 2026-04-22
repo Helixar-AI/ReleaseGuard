@@ -45,6 +45,7 @@ type ScanConfig struct {
 	Metadata        MetadataConfig   `mapstructure:"metadata"         yaml:"metadata"`
 	UnexpectedFiles UnexpectedConfig `mapstructure:"unexpected_files" yaml:"unexpected_files"`
 	Licenses        LicenseConfig    `mapstructure:"licenses"         yaml:"licenses"`
+	Symlinks        SymlinksConfig   `mapstructure:"symlinks"         yaml:"symlinks"`
 }
 
 type SecretsConfig struct {
@@ -66,6 +67,15 @@ type UnexpectedConfig struct {
 type LicenseConfig struct {
 	Enabled bool     `mapstructure:"enabled" yaml:"enabled"`
 	Require []string `mapstructure:"require" yaml:"require"`
+}
+
+// SymlinksConfig controls detection of symbolic links within the artifact tree.
+type SymlinksConfig struct {
+	// Enabled controls whether the symlink scanner runs.
+	Enabled bool `mapstructure:"enabled" yaml:"enabled"`
+	// Allow lists specific symlink paths (relative to scan root) that are permitted.
+	// Useful for intentional symlinks like `latest -> v1.2.3`.
+	Allow []string `mapstructure:"allow" yaml:"allow,omitempty"`
 }
 
 type TransformConfig struct {
