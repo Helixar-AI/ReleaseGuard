@@ -8,7 +8,7 @@ ReleaseGuard is an open-source artifact security engine. It scans build outputs 
 
 [![CI](https://github.com/Helixar-AI/ReleaseGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/Helixar-AI/ReleaseGuard/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Helixar-AI/ReleaseGuard)](https://goreportcard.com/report/github.com/Helixar-AI/ReleaseGuard)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 ---
 
@@ -345,7 +345,7 @@ Issues and PRs are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+Apache-2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 ---
 
